@@ -19,10 +19,25 @@ export interface Env {
 
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
-		const response = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
-			prompt: 'What is the origin of the phrase Hello, World',
-		});
+		try {
+			const response = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+				prompt: 'What is the origin of the phrase Hello, World',
+				stream: true,
+			});
 
-		return new Response(JSON.stringify(response));
+			return new Response(JSON.stringify(response), {
+				headers: {
+					'Content-Type': 'application/json',
+					'Cache-Control': 'no-cache',
+					Connection: 'keep-alive',
+				},
+			});
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			return new Response(`Error processing your request: ${errorMessage}`, {
+				status: 500,
+				headers: { 'Content-Type': 'text/plain' },
+			});
+		}
 	},
 } satisfies ExportedHandler<Env>;
