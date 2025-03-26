@@ -20,17 +20,13 @@ export interface Env {
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
 		try {
-			const response = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+			const response = env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
 				prompt: 'What is the origin of the phrase Hello, World',
 				stream: true,
 			});
 
-			return new Response(JSON.stringify(response), {
-				headers: {
-					'Content-Type': 'application/json',
-					'Cache-Control': 'no-cache',
-					Connection: 'keep-alive',
-				},
+			return new Response(response, {
+				headers: { "content-type": "text/event-stream" }
 			});
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
