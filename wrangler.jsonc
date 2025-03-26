@@ -4,9 +4,12 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "cloudflare-ai-poc",
-	"main": "src/index.ts",
+	"ai": {
+		"binding": "AI"
+	},
 	"compatibility_date": "2025-03-21",
+	"main": "src/index.ts",
+	"name": "cloudflare-ai-poc",
 	"observability": {
 		"enabled": true
 	}
