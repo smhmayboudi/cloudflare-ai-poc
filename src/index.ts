@@ -11,6 +11,9 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 
+import { streamText } from 'ai';
+import { createWorkersAI } from 'workers-ai-provider';
+
 export interface Env {
 	// If you set another name in the Wrangler config file as the value for 'binding',
 	// replace "AI" with the variable name you defined.
@@ -19,21 +22,32 @@ export interface Env {
 
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
-		try {
-			const response = env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
-				prompt: 'What is the origin of the phrase Hello, World',
-				stream: true,
-			});
+		// const response = env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+		// 	prompt: 'What is the origin of the phrase Hello, World',
+		// 	stream: true,
+		// });
 
-			return new Response(response, {
-				headers: { "content-type": "text/event-stream" }
-			});
-		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-			return new Response(`Error processing your request: ${errorMessage}`, {
-				status: 500,
-				headers: { 'Content-Type': 'text/plain' },
-			});
-		}
+		// return new Response(response, {
+		// 	headers: { 'content-type': 'text/event-stream' },
+		// });
+
+		const workersai = createWorkersAI({ binding: env.AI });
+		const text = await streamText({
+			messages: [
+				{
+					role: 'user',
+					content: 'What is the origin of the phrase Hello, World',
+				},
+			],
+			model: workersai('@cf/meta/llama-3.1-8b-instruct'),
+		});
+
+		return text.toTextStreamResponse({
+			headers: {
+				'Content-Type': 'text/x-unknown',
+				'content-encoding': 'identity',
+				'transfer-encoding': 'chunked',
+			},
+		});
 	},
 } satisfies ExportedHandler<Env>;
