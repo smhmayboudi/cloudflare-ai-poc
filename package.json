@@ -18,6 +18,7 @@
 	},
 	"dependencies": {
 		"ai": "^4.2.5",
-		"workers-ai-provider": "^0.2.0"
+		"workers-ai-provider": "^0.2.0",
+		"zod": "^3.24.2"
 	}
 }
