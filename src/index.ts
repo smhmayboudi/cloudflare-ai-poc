@@ -149,9 +149,49 @@ export default {
 		// );
 
 		// # 6 Test
-		const sum = (args: { a: number; b: number }): Promise<string> => {
-			const { a, b } = args;
-			return Promise.resolve((a + b).toString());
+		// const sum = (args: { a: number; b: number }): Promise<string> => {
+		// 	const { a, b } = args;
+		// 	return Promise.resolve((a + b).toString());
+		// };
+
+		// const response = await runWithTools(
+		// 	env.AI as unknown as import('@cloudflare/workers-types').Ai,
+		// 	'@hf/nousresearch/hermes-2-pro-mistral-7b',
+		// 	{
+		// 		messages: [
+		// 			{
+		// 				content: 'What the result of 123123123 + 10343030?',
+		// 				role: 'user',
+		// 			},
+		// 		],
+		// 		tools: [
+		// 			{
+		// 				description: 'Sum up two numbers and returns the result',
+		// 				function: sum,
+		// 				name: 'sum',
+		// 				parameters: {
+		// 					properties: {
+		// 						a: { type: 'number', description: 'the first number' },
+		// 						b: { type: 'number', description: 'the second number' },
+		// 					},
+		// 					required: ['a', 'b'],
+		// 					type: 'object',
+		// 				},
+		// 			},
+		// 		],
+		// 	}
+		// );
+
+		// # 7 Test
+		const getWeather = async (args: { numDays: number }) => {
+			const { numDays } = args;
+			// https://developers.cloudflare.com/workers/runtime-apis/request/#incomingrequestcfproperties
+			const lat = request.cf?.latitude;
+			const long = request.cf?.longitude;
+			const response = await fetch(
+				`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${long}&daily=temperature_2m_max,precipitation_sum&timezone=GMT&forecast_days=${numDays}`
+			);
+			return response.text();
 		};
 
 		const response = await runWithTools(
@@ -160,21 +200,20 @@ export default {
 			{
 				messages: [
 					{
-						content: 'What the result of 123123123 + 10343030?',
+						content: 'What the weather like the next 5 days? Respond as text',
 						role: 'user',
 					},
 				],
 				tools: [
 					{
-						description: 'Sum up two numbers and returns the result',
-						function: sum,
-						name: 'sum',
+						description: 'Get the weather for the next [numDays] days',
+						function: getWeather,
+						name: 'getWeather',
 						parameters: {
 							properties: {
-								a: { type: 'number', description: 'the first number' },
-								b: { type: 'number', description: 'the second number' },
+								numDays: { type: 'numDays', description: 'number of days for the weather forecast' },
 							},
-							required: ['a', 'b'],
+							required: ['numDays'],
 							type: 'object',
 						},
 					},
