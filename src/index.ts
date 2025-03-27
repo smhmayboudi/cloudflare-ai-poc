@@ -106,44 +106,79 @@ export default {
 		// 	}
 		// );
 
+		// # 5 Test
+		// const response = await runWithTools(
+		// 	env.AI as unknown as import('@cloudflare/workers-types').Ai,
+		// 	'@hf/nousresearch/hermes-2-pro-mistral-7b',
+		// 	{
+		// 		messages: [{ role: 'user', content: "What's the weather in Austin, Texas?" }],
+		// 		tools: [
+		// 			{
+		// 				description: 'Return the weather for a latitude and longitude',
+		// 				function: async ({ latitude, longitude }) => {
+		// 					const url = `https://api.weatherapi.com/v1/current.json?key=${env.WEATHERAPI_TOKEN}&q=${latitude},${longitude}`;
+		// 					const res = await fetch(url).then((res) => res.json());
+
+		// 					return JSON.stringify(res);
+		// 				},
+		// 				name: 'getWeather',
+		// 				parameters: {
+		// 					properties: {
+		// 						latitude: {
+		// 							description: 'The latitude for the given location',
+		// 							type: 'string',
+		// 						},
+		// 						longitude: {
+		// 							description: 'The longitude for the given location',
+		// 							type: 'string',
+		// 						},
+		// 					},
+		// 					required: ['latitude', 'longitude'],
+		// 					type: 'object',
+		// 				},
+		// 			},
+		// 		],
+		// 	},
+		// 	{
+		// 		maxRecursiveToolRuns: 5,
+		// 		streamFinalResponse: true,
+		// 		strictValidation: true,
+		// 		trimFunction: autoTrimTools,
+		// 		verbose: true,
+		// 	}
+		// );
+
+		// # 6 Test
+		const sum = (args: { a: number; b: number }): Promise<string> => {
+			const { a, b } = args;
+			return Promise.resolve((a + b).toString());
+		};
+
 		const response = await runWithTools(
 			env.AI as unknown as import('@cloudflare/workers-types').Ai,
 			'@hf/nousresearch/hermes-2-pro-mistral-7b',
 			{
-				messages: [{ role: 'user', content: "What's the weather in Austin, Texas?" }],
+				messages: [
+					{
+						content: 'What the result of 123123123 + 10343030?',
+						role: 'user',
+					},
+				],
 				tools: [
 					{
-						description: 'Return the weather for a latitude and longitude',
-						function: async ({ latitude, longitude }) => {
-							const url = `https://api.weatherapi.com/v1/current.json?key=${env.WEATHERAPI_TOKEN}&q=${latitude},${longitude}`;
-							const res = await fetch(url).then((res) => res.json());
-
-							return JSON.stringify(res);
-						},
-						name: 'getWeather',
+						description: 'Sum up two numbers and returns the result',
+						function: sum,
+						name: 'sum',
 						parameters: {
 							properties: {
-								latitude: {
-									description: 'The latitude for the given location',
-									type: 'string',
-								},
-								longitude: {
-									description: 'The longitude for the given location',
-									type: 'string',
-								},
+								a: { type: 'number', description: 'the first number' },
+								b: { type: 'number', description: 'the second number' },
 							},
-							required: ['latitude', 'longitude'],
+							required: ['a', 'b'],
 							type: 'object',
 						},
 					},
 				],
-			},
-			{
-				maxRecursiveToolRuns: 5,
-				streamFinalResponse: true,
-				strictValidation: true,
-				trimFunction: autoTrimTools,
-				verbose: true,
 			}
 		);
 
